@@ -1,5 +1,5 @@
 import { describe } from 'mocha';
-import { Actions, Browser, Builder, By, Key, WebDriver } from 'selenium-webdriver';
+import { Browser, Builder, By, Key, WebDriver } from 'selenium-webdriver';
 import { expect } from 'chai';
 
 describe('Testing herokuapp', async () => {
@@ -81,34 +81,20 @@ describe('Testing herokuapp', async () => {
   it('Hovers', async () => {
     await driver.get('http://the-internet.herokuapp.com/hovers');
     let images = await driver.findElements(By.css('div.figure'));
+    let actions;
 
-    let actions = driver.actions();
-    await actions.move({ origin: images[0] }).perform();
-    expect(await driver.findElement(By.xpath('/html/body/div[2]/div/div/div[1]/div/h5')).getText()).to.equal(
-      'name: user1',
-    );
-    await actions.click(driver.findElement(By.xpath("//a[@href='/users/1']"))).perform();
-    expect(await driver.getCurrentUrl()).to.equal('https://the-internet.herokuapp.com/users/1');
-    await driver.navigate().back();
+    for (let i = 1; i <= images.length; i++) {
+      images = await driver.findElements(By.css('div.figure'));
+      actions = driver.actions();
+      await actions.move({ origin: images[i - 1] }).perform();
 
-    images = await driver.findElements(By.css('div.figure'));
-    actions = driver.actions();
-    await actions.move({ origin: images[1] }).perform();
-    console.log(await driver.getCurrentUrl());
-    expect(await driver.findElement(By.xpath('/html/body/div[2]/div/div/div[2]/div/h5')).getText()).to.equal(
-      'name: user2',
-    );
-    await actions.click(driver.findElement(By.xpath("//a[@href='/users/2']"))).perform();
-    expect(await driver.getCurrentUrl()).to.equal('https://the-internet.herokuapp.com/users/2');
-    await driver.navigate().back();
+      const expectedText = `name: user${i}`;
+      const heading = await driver.findElement(By.xpath(`/html/body/div[2]/div/div/div[${i}]/div/h5`));
+      expect(await heading.getText()).to.equal(expectedText);
 
-    images = await driver.findElements(By.css('div.figure'));
-    actions = driver.actions();
-    await actions.move({ origin: images[2] }).perform();
-    expect(await driver.findElement(By.xpath('/html/body/div[2]/div/div/div[3]/div/h5')).getText()).to.equal(
-      'name: user3',
-    );
-    await actions.click(driver.findElement(By.xpath("//a[@href='/users/3']"))).perform();
-    expect(await driver.getCurrentUrl()).to.equal('https://the-internet.herokuapp.com/users/3');
+      await actions.click(driver.findElement(By.xpath(`//a[@href='/users/${i}']`))).perform();
+      expect(await driver.getCurrentUrl()).to.equal(`https://the-internet.herokuapp.com/users/${i}`);
+      await driver.navigate().back();
+    }
   });
 });
