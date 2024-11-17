@@ -80,24 +80,35 @@ describe('Testing herokuapp', async () => {
 
   it('Hovers', async () => {
     await driver.get('http://the-internet.herokuapp.com/hovers');
-    const images = await driver.findElements(By.css('div.figure'));
+    let images = await driver.findElements(By.css('div.figure'));
 
-    const actions = driver.actions();
+    let actions = driver.actions();
     await actions.move({ origin: images[0] }).perform();
     expect(await driver.findElement(By.xpath('/html/body/div[2]/div/div/div[1]/div/h5')).getText()).to.equal(
       'name: user1',
     );
-    // await actions.click(driver.findElement(By.xpath("//a[@href='/users/1']"))).perform();
-    // expect(await driver.getCurrentUrl()).to.equal('https://the-internet.herokuapp.com/users/1');
-    // await driver.navigate().back();
-    // console.log(await driver.getCurrentUrl());
+    await actions.click(driver.findElement(By.xpath("//a[@href='/users/1']"))).perform();
+    expect(await driver.getCurrentUrl()).to.equal('https://the-internet.herokuapp.com/users/1');
+    await driver.navigate().back();
+
+    images = await driver.findElements(By.css('div.figure'));
+    actions = driver.actions();
     await actions.move({ origin: images[1] }).perform();
+    console.log(await driver.getCurrentUrl());
     expect(await driver.findElement(By.xpath('/html/body/div[2]/div/div/div[2]/div/h5')).getText()).to.equal(
       'name: user2',
     );
+    await actions.click(driver.findElement(By.xpath("//a[@href='/users/2']"))).perform();
+    expect(await driver.getCurrentUrl()).to.equal('https://the-internet.herokuapp.com/users/2');
+    await driver.navigate().back();
+
+    images = await driver.findElements(By.css('div.figure'));
+    actions = driver.actions();
     await actions.move({ origin: images[2] }).perform();
     expect(await driver.findElement(By.xpath('/html/body/div[2]/div/div/div[3]/div/h5')).getText()).to.equal(
       'name: user3',
     );
+    await actions.click(driver.findElement(By.xpath("//a[@href='/users/3']"))).perform();
+    expect(await driver.getCurrentUrl()).to.equal('https://the-internet.herokuapp.com/users/3');
   });
 });
