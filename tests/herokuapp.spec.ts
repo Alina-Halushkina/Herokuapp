@@ -1,5 +1,5 @@
 import { describe } from 'mocha';
-import { Browser, Builder, By, Key, WebDriver } from 'selenium-webdriver';
+import { Browser, Builder, By, Key, until, WebDriver } from 'selenium-webdriver';
 import { expect } from 'chai';
 
 describe('Testing herokuapp', async () => {
@@ -96,5 +96,49 @@ describe('Testing herokuapp', async () => {
       expect(await driver.getCurrentUrl()).to.equal(`https://the-internet.herokuapp.com/users/${i}`);
       await driver.navigate().back();
     }
+  });
+
+  it('Context Menu', async () => {
+    await driver.get('http://the-internet.herokuapp.com/context_menu');
+    const contextMenu = await driver.findElement(By.id('hot-spot'));
+    await driver.actions().contextClick(contextMenu).perform();
+    await driver.switchTo().alert();
+    expect(await driver.switchTo().alert().getText()).to.equal('You selected a context menu');
+    await driver.switchTo().alert().accept();
+  });
+
+  it('Dynamic Controls part 1', async () => {
+    await driver.get('http://the-internet.herokuapp.com/dynamic_controls');
+    expect(await driver.findElement(By.css("input[type='checkbox']"))).to.exist;
+    await driver.findElement(By.css("button[onclick='swapCheckbox()']")).click();
+    const loading = await driver.findElement(By.id('loading'));
+    await driver.wait(until.elementIsNotVisible(loading), 10000);
+    const message = await driver.findElement(By.id('message'));
+    expect(await message.getText()).to.equal("It's gone!");
+    const checkboxes = await driver.findElements(By.css("input[type='checkbox']"));
+    expect(checkboxes.length).to.equal(0);
+  });
+
+  it('Dynamic Controls part 2', async () => {
+    await driver.get('http://the-internet.herokuapp.com/dynamic_controls');
+    const input = await driver.findElement(By.css("input[type='text']"));
+    expect(await input.isEnabled()).to.be.false;
+
+    await driver.findElement(By.css("button[onclick='swapInput()']")).click();
+    const loading = await driver.findElement(By.id('loading'));
+    await driver.wait(until.elementIsNotVisible(loading), 10000);
+    const message = await driver.findElement(By.id('message'));
+    expect(await message.getText()).to.equal("It's enabled!");
+    expect(await input.isEnabled()).to.be.true;
+  });
+
+  it('iFrame', async () => {
+    await driver.get('http://the-internet.herokuapp.com/iframe');
+    const iframe = await driver.findElement(By.id('mce_0_ifr'));
+    await driver.wait(iframe.isDisplayed(), 10000);
+    await driver.switchTo().frame(iframe);
+    const text = await driver.findElement(By.css('body')).getText();
+    expect(text).to.include('Your content goes here.');
+    await driver.switchTo().defaultContent();
   });
 });
